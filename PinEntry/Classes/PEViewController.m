@@ -23,7 +23,6 @@
 ********************************************************************************/
 
 #import "PEViewController.h"
-#import "Blockchain-Swift.h"
 
 @interface PEViewController ()
 

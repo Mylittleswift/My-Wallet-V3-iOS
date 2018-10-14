@@ -36,6 +36,9 @@
 
 #define DICTIONARY_KEY_CURRENCY @"currency"
 
+NSString * const kAccountInvitations = @"invited";
+NSString * const kLockboxInvitation = @"lockbox";
+
 @interface Wallet ()
 @property (nonatomic) JSContext *context;
 @property (nonatomic) BOOL isSettingDefaultAccount;
@@ -2409,6 +2412,17 @@
     return [[self.context evaluateScript:@"MyWalletPhone.canUseSfox()"] toBool];
 }
 
+- (BOOL)isLockboxEnabled
+{
+    if ([self.accountInfo objectForKey:kAccountInvitations]) {
+        NSDictionary *invitations = [self.accountInfo objectForKey:kAccountInvitations];
+        BOOL enabled = [invitations objectForKey:kLockboxInvitation];
+        return enabled;
+    } else {
+        return NO;
+    }
+}
+
 - (void)watchPendingTrades:(BOOL)shouldSync
 {
     if (shouldSync) {
@@ -2685,7 +2699,7 @@
     [self.context evaluateScript:script];
 }
 
-- (void)sendOrderTransaction:(LegacyAssetType)legacyAssetType completion:(void (^ _Nonnull)(void))completion success:(void (^ _Nonnull)(void))success error:(void (^ _Nonnull)(NSString *_Nonnull))error cancel:(void (^ _Nonnull)(void))cancel
+- (void)sendOrderTransaction:(LegacyAssetType)legacyAssetType secondPassword:(NSString* _Nullable)secondPassword completion:(void (^ _Nonnull)(void))completion success:(void (^ _Nonnull)(void))success error:(void (^ _Nonnull)(NSString *_Nonnull))error cancel:(void (^ _Nonnull)(void))cancel
 {
     [self.context invokeOnceWithFunctionBlock:^{
         completion();
@@ -2713,7 +2727,7 @@
         return;
     }
     
-    [self.context evaluateScript:[NSString stringWithFormat:@"MyWalletPhone.tradeExecution.%@.send()", tradeExecutionType]];
+    [self.context evaluateScript:[NSString stringWithFormat:@"MyWalletPhone.tradeExecution.%@.send(%@)", tradeExecutionType, [secondPassword escapedForJS]]];
 }
 
 # pragma mark - Ethereum
